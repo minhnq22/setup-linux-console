@@ -56,6 +56,21 @@ fi
 
 echo "Tmux and TPM installation completed."
 
+# Create .tmux.conf file
+cat <<EOF > $HOME/.tmux.conf
+# List of plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'arcticicestudio/nord-tmux'
+set -g @plugin 'tmux-plugins/tmux-prefix-highlight'
+set -g mouse on
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run '~/.tmux/plugins/tpm/tpm'
+EOF
+
+echo "Tmux configuration file created."
+
 # Install bat
 if ! command -v bat &> /dev/null; then
     echo "Bat is not installed. Installing..."
