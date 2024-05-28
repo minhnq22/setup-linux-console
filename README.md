@@ -2,22 +2,26 @@
 Setup some config for Linux server.
 
 ```
-#!/bin/bash
+#!/bin/bash -e
 
 sudo apt update
+
+# Check if git is installed
+if ! command -v git &> /dev/null; then
+    echo "Git is not installed. Installing..."
+    sudo apt install -y git
+fi
 
 # Check if zsh is installed
 if ! command -v zsh &> /dev/null; then
     echo "Zsh is not installed. Installing..."
-    # Install zsh
     sudo apt install -y zsh
 fi
 
 # Check if Oh My Zsh is installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "Oh My Zsh is not installed. Installing..."
-    # Install Oh My Zsh
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
 # Install zsh-syntax-highlighting plugin
@@ -32,8 +36,11 @@ if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ]; then
     git clone https://github.com/zsh-users/zsh-autosuggestions.git $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 fi
 
-# Update zshrc to enable plugins
-sed -i -e 's/plugins=(/plugins=(zsh-syntax-highlighting zsh-autosuggestions /' $HOME/.zshrc
+# Update .zshrc to enable plugins and set theme
+if ! grep -q "zsh-syntax-highlighting" $HOME/.zshrc; then
+    sed -i -e 's/plugins=(/plugins=(zsh-syntax-highlighting zsh-autosuggestions /' $HOME/.zshrc
+fi
+sed -i -e 's/ZSH_THEME=".*"/ZSH_THEME="lukerandall"/' $HOME/.zshrc
 
 # Change default shell to zsh
 chsh -s $(which zsh)
@@ -43,14 +50,12 @@ echo "Oh My Zsh installation with plugins completed."
 # Check if tmux is installed
 if ! command -v tmux &> /dev/null; then
     echo "Tmux is not installed. Installing..."
-    # Install tmux
     sudo apt install -y tmux
 fi
 
 # Check if tmux plugin manager (TPM) is installed
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
     echo "Tmux Plugin Manager (TPM) is not installed. Installing..."
-    # Install TPM
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
 
@@ -69,32 +74,35 @@ set -g mouse on
 run '~/.tmux/plugins/tpm/tpm'
 EOF
 
-echo "Tmux configuration file created."
+# Install Tmux plugins
+$HOME/.tmux/plugins/tpm/bin/install_plugins
+
+echo "Tmux configuration file created and plugins installed."
 
 # Install bat
-if ! command -v bat &> /dev/null; then
+if ! command -v batcat &> /dev/null; then
     echo "Bat is not installed. Installing..."
-    # Download and install bat
     sudo apt install -y bat
 fi
 
 # Install lsd
 if ! command -v lsd &> /dev/null; then
     echo "LSD is not installed. Installing..."
-    # Download and install lsd
     sudo apt install -y lsd
 fi
 
 echo "Bat and LSD installation completed."
 
 # Add aliases to .zshrc
-cat <<EOF >> $HOME/.zshrc
+if ! grep -q "alias ls='lsd --group-dirs first'" $HOME/.zshrc; then
+    cat <<EOF >> $HOME/.zshrc
 # Aliases for LSD and BAT
 alias ls='lsd --group-dirs first'
 alias tree='lsd --tree'
 alias bat='batcat --theme=base16-256'
 alias cat='batcat --pager=never'
 EOF
+fi
 
 echo "Aliases added to .zshrc."
 ```
