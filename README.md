@@ -1,22 +1,11 @@
-# setup-linux-console
-Setup some config for Linux server.
+# setup-linux-console.sh
 
 ```
 #!/bin/bash -e
 
+# Update package list and install packages
 sudo apt update
-
-# Check if git is installed
-if ! command -v git &> /dev/null; then
-    echo "Git is not installed. Installing..."
-    sudo apt install -y git
-fi
-
-# Check if zsh is installed
-if ! command -v zsh &> /dev/null; then
-    echo "Zsh is not installed. Installing..."
-    sudo apt install -y zsh
-fi
+sudo apt install -y git zsh tmux btop bat lsd
 
 # Check if Oh My Zsh is installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -42,16 +31,10 @@ if ! grep -q "zsh-syntax-highlighting" $HOME/.zshrc; then
 fi
 sed -i -e 's/ZSH_THEME=".*"/ZSH_THEME="lukerandall"/' $HOME/.zshrc
 
-# Change default shell to zsh
-chsh -s $(which zsh)
+# Change default shell to zsh without prompting for password
+sudo chsh -s $(which zsh) $USER
 
 echo "Oh My Zsh installation with plugins completed."
-
-# Check if tmux is installed
-if ! command -v tmux &> /dev/null; then
-    echo "Tmux is not installed. Installing..."
-    sudo apt install -y tmux
-fi
 
 # Check if tmux plugin manager (TPM) is installed
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
@@ -79,19 +62,17 @@ $HOME/.tmux/plugins/tpm/bin/install_plugins
 
 echo "Tmux configuration file created and plugins installed."
 
-# Install bat
-if ! command -v batcat &> /dev/null; then
-    echo "Bat is not installed. Installing..."
-    sudo apt install -y bat
+# Configure btop to use the "flat-remix" theme
+if [ ! -d "$HOME/.config/btop" ]; then
+    mkdir -p $HOME/.config/btop
+fi
+if [ -f "$HOME/.config/btop/btop.conf" ]; then
+    sed -i 's|^color_theme =.*|color_theme = "/usr/share/btop/themes/flat-remix.theme"|' $HOME/.config/btop/btop.conf
+else
+    echo 'color_theme = "/usr/share/btop/themes/flat-remix.theme"' > $HOME/.config/btop/btop.conf
 fi
 
-# Install lsd
-if ! command -v lsd &> /dev/null; then
-    echo "LSD is not installed. Installing..."
-    sudo apt install -y lsd
-fi
-
-echo "Bat and LSD installation completed."
+echo "btop configuration completed with flat-remix theme."
 
 # Add aliases to .zshrc
 if ! grep -q "alias ls='lsd --group-dirs first'" $HOME/.zshrc; then
