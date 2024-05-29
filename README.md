@@ -5,7 +5,7 @@
 
 # Update package list and install packages
 sudo apt update
-sudo apt install -y git zsh tmux btop bat lsd
+sudo apt install -y git zsh tmux btop bat lsd fzf
 
 # Check if Oh My Zsh is installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -82,8 +82,31 @@ alias ls='lsd --group-dirs first'
 alias tree='lsd --tree'
 alias bat='batcat --theme=base16-256'
 alias cat='batcat --pager=never'
+
+# Man page
+export LESS_TERMCAP_mb=$'\e[1;32m'
+export LESS_TERMCAP_md=$'\e[1;32m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[01;33m'
+export LESS_TERMCAP_ue=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[1;4;31m'
+
+# FZF config
+__search_history() {
+    local selected_command
+    selected_command=$(history 0 | awk '{$1=""; if (!seen[$0]++) print $0}' | fzf --exact --tac --height 40% --reverse --inline-info --preview-window=up:3:wrap --preview 'echo {}')
+    if [[ -n $selected_command ]]; then
+        BUFFER=$(echo "$selected_command" | sed 's/^[ \t]*//')
+        CURSOR=$#BUFFER
+    fi
+    zle clear-screen
+}
+zle -N __search_history
+bindkey '^F' __search_history
+
 EOF
 fi
 
-echo "Aliases added to .zshrc."
+echo "Added some to .zshrc."
 ```
