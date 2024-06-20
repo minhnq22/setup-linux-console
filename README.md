@@ -80,22 +80,13 @@ if ! grep -q "alias ls='lsd --group-dirs first'" $HOME/.zshrc; then
 # Aliases for LSD and BAT
 alias ls='lsd --group-dirs first'
 alias tree='lsd --tree'
-alias bat='batcat --theme=base16-256'
 alias cat='batcat --pager=never'
-
-# Man page
-export LESS_TERMCAP_mb=$'\e[1;32m'
-export LESS_TERMCAP_md=$'\e[1;32m'
-export LESS_TERMCAP_me=$'\e[0m'
-export LESS_TERMCAP_se=$'\e[0m'
-export LESS_TERMCAP_so=$'\e[01;33m'
-export LESS_TERMCAP_ue=$'\e[0m'
-export LESS_TERMCAP_us=$'\e[1;4;31m'
+alias fzf='fzf --exact --tac --height 40% --reverse --inline-info --preview-window=up:3:wrap --preview "echo {}"'
 
 # FZF config
 __search_history() {
     local selected_command
-    selected_command=$(history 0 | awk '{$1=""; if (!seen[$0]++) print $0}' | fzf --exact --tac --height 40% --reverse --inline-info --preview-window=up:3:wrap --preview 'echo {}')
+    selected_command=$(history 0 | awk '{$1=""; if (!seen[$0]++) print $0}' | fzf)
     if [[ -n $selected_command ]]; then
         BUFFER=$(echo "$selected_command" | sed 's/^[ \t]*//')
         CURSOR=$#BUFFER
