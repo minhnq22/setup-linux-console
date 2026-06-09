@@ -1,36 +1,3 @@
-# setup-linux-console.sh
-
-A non-interactive script to set up a productive Linux console environment.
-
-## What it installs
-
-| Tool | Purpose |
-|------|---------|
-| zsh + Oh My Zsh | Shell with `lukerandall` theme, syntax highlighting, autosuggestions |
-| tmux + TPM | Terminal multiplexer with Nord theme |
-| lsd | Modern `ls` replacement (requires Nerd Font for icons) |
-| bat / batcat | Modern `cat` replacement with syntax highlighting |
-| fzf | Fuzzy finder with Ctrl+F history search |
-| zoxide | Smarter `cd` |
-| btop | Resource monitor |
-| neovim + NvChad | Modern terminal editor |
-| JetBrainsMono Nerd Font | Icon font for lsd, tmux, and nvim |
-
-## Usage
-
-```bash
-bash setup-linux-console.sh
-```
-
-## Post-install steps
-
-1. **Log out and log back in** to apply Zsh as the default shell
-2. **Start tmux** and press `prefix + I` to install tmux plugins
-3. **Run `nvim`** to complete NvChad plugin installation
-
-## Script
-
-```bash
 #!/bin/bash -e
 
 # ===============================================
@@ -107,6 +74,7 @@ setup_zsh() {
         echo "Oh My Zsh already installed."
     fi
 
+    # Install required plugins
     local HIGHLIGHT_DIR="$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
     local AUTOSUGGEST_DIR="$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
 
@@ -165,6 +133,7 @@ configure_btop() {
 
     mkdir -p "$BTOP_CONF_DIR"
 
+    # Use the built-in Default theme; flat-remix path is not bundled on all distros
     local THEME_VALUE="Default"
 
     if [ -f "$BTOP_CONF_FILE" ]; then
@@ -218,12 +187,15 @@ add_aliases_and_functions() {
 # CUSTOM ALIASES & FUNCTIONS
 # ===============================================
 
+# Aliases for LSD (better 'ls') and BAT (better 'cat')
 alias ls='lsd --group-dirs first'
 alias tree='lsd --tree'
 alias cat='${BAT_BIN} --pager=never --style=plain'
 
+# FZF configuration for fuzzy finding
 alias fzf='fzf --exact --tac --height 40% --reverse --inline-info --preview-window=up:3:wrap --preview "echo {}"'
 
+# FZF History Search Function: Binds to Ctrl+F (^F)
 __search_history() {
     local selected_command
     selected_command=\$(history 0 | awk '{\$1=""; if (!seen[\$0]++) print \$0}' | fzf)
@@ -237,6 +209,7 @@ __search_history() {
 zle -N __search_history
 bindkey '^F' __search_history
 
+# Zoxide Initialization
 eval "\$(zoxide init zsh)"
 
 EOF
@@ -276,4 +249,7 @@ echo "  1. LOG OUT and LOG BACK IN to apply Zsh as the default shell"
 echo "  2. Start tmux and press 'prefix + I' to install tmux plugins"
 echo "  3. Run 'nvim' to complete NvChad plugin installation"
 echo "================================================="
-```
+
+# ===============================================
+# END OF SCRIPT
+# ===============================================
